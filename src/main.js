@@ -34,27 +34,11 @@ container.position.x = 400;
 container.position.y = 300;
 
 function init() {
-	// Square Object test
-	var texture1 = PIXI.Texture.fromImage("image/square.jpg");
-	var square1 = new Square(texture1);
-	square1.init();
-	stage.addChild(square1);
-	var texture2 = PIXI.Texture.fromImage("image/square2.jpg");
-	var square2 = new Square(texture2);
-	square2.init();
-	square2.position.x += 40;
-	stage.addChild(square2);
-	console.log(stage.children);
-
 	// Matrix Object test
 	var matrix = new Matrix();
 	matrix.init()
 	matrix.position = new PIXI.Point(100, 100);
 	stage.addChild(matrix);
-
-	var cell = new Cell();
-	cell.position = new PIXI.Point(100, 300);
-	stage.addChild(cell);
 }
 
 function animate() {
