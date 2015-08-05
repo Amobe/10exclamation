@@ -14,8 +14,8 @@ function getRandomValue(min, max) {
 	return Math.round(Math.random() * (max - min) + min);
 }
 
-function onCellClick(eventDate) {
-	var cell = eventDate.target;
+function onCellClick(eventData) {
+	var cell = eventData.target;
 	cell.value = VALUE_AFTER_CLICK;
 	cell.update();
 }
