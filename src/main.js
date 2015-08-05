@@ -1,3 +1,6 @@
+// FPS init
+var meter = new FPSMeter({theme: 'dark'});
+
 var stage = new PIXI.Stage(0x66FF99);
 
 var renderer = PIXI.autoDetectRenderer(800, 600, {
@@ -50,6 +53,8 @@ function animate() {
 	// }
 
 	renderer.render(stage);
+	meter.tickStart();
+	meter.tick();
 }
 
 function onClick(eventData) {
