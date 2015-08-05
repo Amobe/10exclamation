@@ -1,8 +1,13 @@
-var VALUE_AFTER_CLICK = -1;
-var RESET_VALUE_MIN = 1;
-var RESET_VALUE_MAX = 5;
-var DEFAULT_VALUE = 0;
-var CELL_VALUE_MAX = 51;
+var VALUE_AFTER_CLICK        = -1;
+var RESET_VALUE_MIN          = 1;
+var RESET_VALUE_MAX          = 5;
+var DEFAULT_VALUE            = 0;
+var CELL_VALUE_MAX           = 51;
+var CELL_WIDTH               = 50;
+var CELL_HEIGHT              = 50;
+var CELL_ROUND               = 3;
+var CELL_SHADOW_HEIGHT       = 6;
+var CELL_SHADOW_HOVER_HEIGHT = 2;
 
 var font_style = {
 	font: 'bold 24px Orbitron',
@@ -10,22 +15,83 @@ var font_style = {
 	align:"center"
 };
 
-function getRandomValue(min, max) {
-	return Math.round(Math.random() * (max - min) + min);
+function onCellClick(eventData) {
+	var cell = eventData.target;
+	if (cell.value == VALUE_AFTER_CLICK)
+		return;
+
+	// setting the value of cell
+	cell.setValue(VALUE_AFTER_CLICK);
+
+	var background = cell.getBackground();
+	var text = cell.getValueText();
+	// remove background
+	background.clear();
+	// add a new backgroun with click style
+	setBackgroundStyleClick(background);
+	// reset the position for text
+	setTextPositionClick(background, text);
 }
 
-function onCellClick(eventDate) {
-	var cell = eventDate.target;
-	cell.value = VALUE_AFTER_CLICK;
-	cell.update();
+function onCellMouseUp(eventData) {
+	var cell = eventData.target;
+	if (cell.value != VALUE_AFTER_CLICK)
+		onCellHover(eventData);
+	else
+		onCellHoverOut(eventData);
+}
+
+function onCellHover(eventData) {
+	var cell = eventData.target;
+	if (cell.value == VALUE_AFTER_CLICK)
+		return;
+
+	var background = cell.getBackground();
+	var text = cell.getValueText();
+	background.clear();
+	setBackgroundStyleHover(background);
+	setTextPositionHover(background, text);
+}
+
+function onCellHoverOut(eventData) {
+	var cell = eventData.target;
+	var background = cell.getBackground();
+	var text = cell.getValueText();
+	background.clear();
+	setBackgroundStyleDefault(background);
+	setTextPositionDefault(background, text);
+}
+
+function setBackgroundStyleDefault(background) {
+	background.beginFill(0x333333, 1);
+	background.drawRoundedRect(0, CELL_SHADOW_HEIGHT, CELL_WIDTH, CELL_HEIGHT, CELL_ROUND);
+	background.endFill();
+	background.beginFill(0xFFFDF8, 1);
+	background.drawRoundedRect(0, 0, CELL_WIDTH, CELL_HEIGHT, CELL_ROUND);
+	background.endFill();
+}
+
+function setBackgroundStyleHover(background) {
+	background.beginFill(0x333333, 1);
+	background.drawRoundedRect(0, CELL_SHADOW_HEIGHT, CELL_WIDTH, CELL_HEIGHT, CELL_ROUND);
+	background.endFill();
+	background.beginFill(0xFFFDF8, 1);
+	background.drawRoundedRect(0, CELL_SHADOW_HOVER_HEIGHT, CELL_WIDTH, CELL_HEIGHT, CELL_ROUND);
+	background.endFill();
+}
+
+function setBackgroundStyleClick(background) {
+	background.beginFill(0x333333, 1);
+	background.drawRoundedRect(0, CELL_SHADOW_HEIGHT, CELL_WIDTH, CELL_HEIGHT, CELL_ROUND);
+	background.endFill();
+	background.beginFill(0xFFFDF8, 1);
+	background.drawRoundedRect(0, CELL_SHADOW_HEIGHT, CELL_WIDTH, CELL_HEIGHT, CELL_ROUND);
+	background.endFill();
 }
 
 function getBackground() {
 	var background = new PIXI.Graphics();
-	//background.lineStyle(2, 0xFF00FF, 1);
-	background.beginFill(0xFFFDF8, 0.25);
-	background.drawRoundedRect(0, 0, 50, 50, 3);
-	background.endFill();
+	setBackgroundStyleDefault(background);
 	return background;
 }
 
@@ -35,14 +101,23 @@ function getValueText(value) {
 	return text;
 }
 
-function setTextPosition(background, text) {
+function setTextPositionDefault(background, text) {
 	text.position.x = (background.width - text.width) / 2;
-	text.position.y = (background.height - text.height) / 2;
+	text.position.y = (background.height - text.height - CELL_SHADOW_HEIGHT) / 2;
+}
+
+function setTextPositionHover(background, text) {
+	text.position.x = (background.width - text.width) / 2;
+	text.position.y = (background.height - text.height + CELL_SHADOW_HOVER_HEIGHT) / 2;
+}
+
+function setTextPositionClick(background, text) {
+	text.position.x = (background.width - text.width) / 2;
+	text.position.y = (background.height - text.height) / 2 + CELL_SHADOW_HEIGHT;
 }
 
 function Cell(value) {
 	PIXI.Container.call(this);
-	//this.value = getRandomValue(RESET_VALUE_MIN, RESET_VALUE_MAX);
 	this.neighbors = new Array();
 
 	if (!value)
@@ -52,7 +127,11 @@ function Cell(value) {
 
 	// click event
 	this.interactive = true;
+
+	this.on("mouseover", onCellHover);
+	this.on("mouseout", onCellHoverOut);
 	this.on("mousedown", onCellClick);
+	this.on("mouseup", onCellMouseUp);
 	this.on("touchstart", onCellClick);
 
 	// initialize
@@ -65,7 +144,7 @@ Cell.prototype.init = function() {
 	var background = getBackground();
 	var text = getValueText(this.value);
 
-	setTextPosition(background, text);
+	setTextPositionDefault(background, text);
 
 	this.addChild(background);
 	this.addChild(text);
@@ -103,7 +182,15 @@ Cell.prototype.addValue = function(value) {
 	}
 }
 
-Cell.prototype.update = function() {
-	this.getValueText().text = this.value.toString();
-	setTextPosition(this.getBackground(), this.getValueText());
+Cell.prototype.setValue = function(value) {
+	this.value = value;
+	// modify the text for view
+	this.getValueText().text = value.toString();
+}
+
+Cell.prototype.update = function(setTextPositionfunc) {
+	if (setTextPositionfunc)
+		setTextPositionfunc(this.getBackground(), this.getValueText());
+	else
+		setTextPositionDefault(this.getBackground(), this.getValueText());
 }

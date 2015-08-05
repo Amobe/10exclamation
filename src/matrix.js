@@ -1,4 +1,6 @@
 
+var CELL_X_GAP_SIZE = 5;
+var CELL_Y_GAP_SIZE = 8;
 var DEFAULT_MATRIX_LEVEL = 5;
 var VALUE_LIST = [
 	1, 1, 1,
@@ -30,6 +32,14 @@ function shuffle(array) {
 	return array;
 }
 
+function getFullWidthGap() {
+	return CELL_X_GAP_SIZE + CELL_WIDTH + CELL_SHADOW_HEIGHT;
+}
+
+function getFullHeightGap() {
+	return CELL_Y_GAP_SIZE + CELL_HEIGHT + CELL_SHADOW_HEIGHT;
+}
+
 function initMatrix() {
 	var new_value_list = VALUE_LIST.slice(0);
 	shuffle(new_value_list);
@@ -38,7 +48,7 @@ function initMatrix() {
 		for (var j = 0; j < this.level; ++j) {
 			var index = (i * this.level) + j;
 			var cell = new Cell(new_value_list[index]);
-			cell.position = new PIXI.Point(55 * j, 55 * i);
+			cell.position = new PIXI.Point(getFullWidthGap() * j, getFullHeightGap() * i);
 			this.addChild(cell);
 		}
 	}
