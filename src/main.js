@@ -38,8 +38,8 @@ container.position.y = 300;
 
 function init() {
 	// Matrix Object test
-	var matrix = new Matrix();
-	matrix.init()
+	matrix = new Matrix();
+	matrix.init();
 	matrix.position = new PIXI.Point(100, 100);
 	stage.addChild(matrix);
 }

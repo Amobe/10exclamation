@@ -9,6 +9,8 @@ var CELL_ROUND               = 3;
 var CELL_SHADOW_HEIGHT       = 6;
 var CELL_SHADOW_HOVER_HEIGHT = 2;
 
+var row, col;
+
 var font_style = {
 	font: 'bold 24px Orbitron',
 	fill: '#333333',
@@ -16,6 +18,8 @@ var font_style = {
 };
 
 function onCellClick(eventData) {
+	this.click_callback(this.row, this.col);
+
 	var cell = eventData.target;
 	if (cell.value == VALUE_AFTER_CLICK)
 		return;
@@ -116,9 +120,13 @@ function setTextPositionClick(background, text) {
 	text.position.y = (background.height - text.height) / 2 + CELL_SHADOW_HEIGHT;
 }
 
-function Cell(value) {
+function Cell(value, row, col, callback) {
 	PIXI.Container.call(this);
-	this.neighbors = new Array();
+	// this.neighbors = new Array();
+
+	this.row = row;
+	this.col = col;
+	this.click_callback = callback;
 
 	if (!value)
 		this.value = DEFAULT_VALUE;
