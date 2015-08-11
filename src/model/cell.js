@@ -5,20 +5,19 @@ var cell_model = ( function () {
 	//Random a value
 	value = 0;
 
-	// init neighbors
-	// two ways
-	// 1. input index and calculate
-	// 2. input the neighbors array
-	neighbors.push(0);
-	neighbors.push(1);
-	neighbors.push(2);
-	console.log(this);
+	function get_value () {
+		return value;
+	}
 
 	function set_value (new_value) {
 		value = new_value;
 	}
 
-	function get_neighbors_array () {
+	function add_neighbor (neighbor) {
+		neighbors.push(neighbor);
+	}
+
+	function get_neighbors () {
 		return neighbors;
 	}
 
@@ -31,8 +30,10 @@ var cell_model = ( function () {
 	}
 
 	return{
+		get_value: get_value,
 		set_value: set_value,
-		get_neighbors_array: get_neighbors_array,
+		get_neighbors: get_neighbors,
+		add_neighbor: add_neighbor,
 		// for debug
 		show: show,
 	}

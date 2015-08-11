@@ -1,16 +1,28 @@
-var cell_0 = new cell_model();
-console.log(cell_0);
-console.log(cell_0.get_self() === cell_0);
-console.log(cell_0.get_self() == cell_0);
-// cell_0.create();
-cell_0.show();
-cell_0.set_value(20);
-cell_0.show();
+var cell = new cell_model();
 
-var cell_1 = new cell_model();
-cell_1.show();
-cell_1.set_value(30);
-cell_1.show();
+// should all be true
 
-console.log(cell_0 === cell_1);
-console.log(cell_0 == cell_1);
+// test initial value
+console.log(cell.get_value() === 0);
+
+// test set
+var new_value = 1;
+cell.set_value(new_value);
+console.log(cell.get_value() === new_value);
+
+
+// test neighbors
+var neighbors = cell.get_neighbors();
+console.log(neighbors.length === 0);
+
+// test add neighbor
+cell.add_neighbor(1);
+neighbors = cell.get_neighbors();
+console.log(neighbors.length === 1);
+console.log(neighbors[0] === 1);
+
+cell.add_neighbor(5);
+neighbors = cell.get_neighbors();
+console.log(neighbors.length === 2);
+console.log(neighbors[0] === 1);
+console.log(neighbors[1] === 5);
