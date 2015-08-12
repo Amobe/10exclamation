@@ -13,6 +13,10 @@ var cell_model = ( function () {
 		value = new_value;
 	}
 
+	function add_value (value_to_be_add) {
+		value += value_to_be_add;
+	}
+
 	function add_neighbor (neighbor) {
 		neighbors.push(neighbor);
 	}
@@ -32,6 +36,7 @@ var cell_model = ( function () {
 	return{
 		get_value: get_value,
 		set_value: set_value,
+		add_value: add_value,
 		get_neighbors: get_neighbors,
 		add_neighbor: add_neighbor,
 		// for debug

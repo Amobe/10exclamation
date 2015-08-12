@@ -1,4 +1,10 @@
 var myMatrix = ( function () {
+	var MATRIX_SIZE = 5;
+	var MATRIX_ROW_MIN = 0;
+	var MATRIX_ROW_MAX = MATRIX_SIZE - 1;
+	var MATRIX_COL_MIN = 0;
+	var MATRIX_COL_MAX = MATRIX_SIZE - 1;
+
 	var row = 5;
 	var col = 5;
 	var matrix = [
@@ -11,6 +17,23 @@ var myMatrix = ( function () {
 		7, 7, 7,
 		8, 8, 8,
 		9, 9, 9];
+	var cell_list;
+
+	function init () {
+		shuffle();
+		_cell_list_factory();
+		_neighbor_register();
+	}
+
+	function _cell_list_factory () {
+		cell_list = new Array();
+
+		for (var i = 0; i < matrix.length; ++i) {
+			var cell = new cell_model();
+			cell.set_value(matrix[i]);
+			cell_list[i] = cell;
+		}
+	}
 
 	function shuffle () {
 		var currentIndex = matrix.length, temporaryValue, randomIndex ;
@@ -30,63 +53,65 @@ var myMatrix = ( function () {
 	}
 
 	function show () {
-		console.log(matrix);
+		console.log(cell_list);
 		for (var i = 0; i < row * col; i += col){
-			console.log(matrix[i], matrix[i+1], matrix[i+2], matrix[i+3], matrix[i+4]);
+			console.log(cell_list[i].get_value(),
+						cell_list[i+1].get_value(),
+						cell_list[i+2].get_value(),
+						cell_list[i+3].get_value(),
+						cell_list[i+4].get_value());
+		}
+	}
+
+	function _index2pos(index) {
+		var x = Math.floor((index) % MATRIX_SIZE);
+		var y = Math.floor((index) / MATRIX_SIZE);
+		var pos = {
+			x: x,
+			y: y
+		};
+		return pos;
+	}
+
+	function _pos2index(pos) {
+		var index = pos.y * MATRIX_SIZE + pos.x;
+		return index;
+	}
+
+	function _neighbor_register() {
+		for (var index = 0; index < Math.pow(MATRIX_SIZE, 2); ++index) {
+			var pos = _index2pos(index);
+
+			var startX = (pos.x - 1 < MATRIX_ROW_MIN) ? pos.x: pos.x - 1;
+			var endX   = (pos.x + 1 > MATRIX_ROW_MAX) ? pos.x: pos.x + 1;
+			var startY = (pos.y - 1 < MATRIX_COL_MIN) ? pos.y: pos.y - 1;
+			var endY   = (pos.y + 1 > MATRIX_COL_MAX) ? pos.y: pos.y + 1;
+
+			// search the neighbors for cell in
+			for (var rowNumber = startX; rowNumber <= endX; ++rowNumber) {
+				for (var colNumber = startY; colNumber <= endY; ++colNumber) {
+					if (rowNumber == pos.x && colNumber == pos.y)
+						continue;
+
+					var neighborPos = {
+						x: rowNumber,
+						y: colNumber
+					};
+
+					var neighborIndex = _pos2index(neighborPos);
+					cell_list[index].add_neighbor(cell_list[neighborIndex]);
+				}
+			}
 		}
 	}
 
 	function _update_neighbors(index) {
-		var neighbnor_index = [];
-		// first row
-		if(index < col){
-			// left up corner
-			if(index == 0){
-				neighbnor_index.push(index+1, index+5, index+6);
-			}
-			// right up corner
-			else if (index == (col -1)){
-				neighbnor_index.push(index-1, index+4, index+5);
-			}
-			// first row not corner
-			else{
-				neighbnor_index.push(index-1, index+1, index+4, index+5, index+6);
-			}
+		var currentCell = cell_list[index];
+		var neighbors = currentCell.get_neighbors();
+		for (var i = 0; i < neighbors.length; ++i) {
+			var neighbor = neighbors[i];
+			neighbor.add_value(currentCell.get_value());
 		}
-		// last row
-		else if(index >= (row * col - col)){
-			// left down corner
-			if(index == row * col -col){
-				neighbnor_index.push(index-5, index-4, index+1);
-			}
-			// right down corner
-			else if (index == row * col -1){
-				neighbnor_index.push(index-6, index-5, index-1);
-			}
-			// last row not corner
-			else{
-				neighbnor_index.push(index-6, index-5, index-4, index-1, index+1);
-			}
-		}
-		// not first nor last row
-		else{
-			// first col
-			if(index % col == 0){
-				neighbnor_index.push(index-5, index-4, index+1, index+5, index+6);
-			}
-			// last col
-			else if((index + 1) % col == 0){
-				neighbnor_index.push(index-6, index-5, index-1, index+4, index+5);
-			}
-			// center 9 neighbors
-			else{
-				neighbnor_index.push(index-6, index-5, index-4, index-1, index+1, index+4, index+5, index+6);
-			}
-		}
-
-		neighbnor_index.forEach(function (i) {
-			matrix[i] += matrix[index];
-		});
 	}
 
 	function click(i, j) {
@@ -105,11 +130,16 @@ var myMatrix = ( function () {
 		return matrix;
 	}
 
+	function get_cell_list () {
+		return cell_list;
+	}
+
 	return{
+		init: init,
 		show: show,
-		shuffle: shuffle,
 		click: click,
-		get_matrix: get_matrix
+		get_matrix: get_matrix,
+		get_cell_list: get_cell_list
 	}
 })()
 
@@ -170,15 +200,12 @@ function click_callback(row, col) {
 }
 
 function initMatrix() {
-	myMatrix.shuffle();
+	myMatrix.init();
 	myMatrix.show();
 
 	var matrix_model = myMatrix.get_matrix();
 
-
 	this.matrix = VALUE_LIST.slice(0);
-	// var new_value_list = VALUE_LIST.slice(0);
-	// shuffle(this.matrix);
 
 	for (var i = 0; i < this.level; ++i) {
 		for (var j = 0; j < this.level; ++j) {
