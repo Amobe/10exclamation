@@ -10,6 +10,13 @@ var new_value = 1;
 cell.set_value(new_value);
 console.log(cell.get_value() === new_value);
 
+// test add
+var origin_value = 1;
+var value_to_be_add = 9;
+var value_after_add = 10
+cell.set_value(origin_value);
+cell.add_value(value_to_be_add);
+console.log(cell.get_value() === value_after_add);
 
 // test neighbors
 var neighbors = cell.get_neighbors();
